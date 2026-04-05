@@ -1,27 +1,54 @@
-import Record from "../models/Record.js";
+import {
+    createRecordService,
+    getRecordsService,
+    updateRecordService,
+    deleteRecordService
+} from "../services/recordService.js";
 
-export const createRecord = async (req, res) => {
-    const record = await Record.create({ ...req.body, createdBy: req.user.id });
-    res.json(record);
+/**
+ * Controller to create a new record.
+ */
+export const createRecord = async (req, res, next) => {
+    try {
+        const record = await createRecordService(req.body, req.user.id);
+        res.status(201).json(record);
+    } catch (error) {
+        next(error);
+    }
 };
 
-export const getRecords = async (req, res) => {
-    const { type, category } = req.query;
-
-    let filter = {};
-    if (type) filter.type = type;
-    if (category) filter.category = category;
-
-    const records = await Record.find(filter);
-    res.json(records);
+/**
+ * Controller to fetch records with optional filtering.
+ */
+export const getRecords = async (req, res, next) => {
+    try {
+        const records = await getRecordsService(req.query, req.user);
+        res.status(200).json(records);
+    } catch (error) {
+        next(error);
+    }
 };
 
-export const updateRecord = async (req, res) => {
-    const record = await Record.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(record);
+/**
+ * Controller to update an existing record.
+ */
+export const updateRecord = async (req, res, next) => {
+    try {
+        const record = await updateRecordService(req.params.id, req.body, req.user);
+        res.status(200).json(record);
+    } catch (error) {
+        next(error);
+    }
 };
 
-export const deleteRecord = async (req, res) => {
-    await Record.findByIdAndDelete(req.params.id);
-    res.json({ message: "Deleted" });
+/**
+ * Controller to delete a record.
+ */
+export const deleteRecord = async (req, res, next) => {
+    try {
+        const result = await deleteRecordService(req.params.id, req.user);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
 };
